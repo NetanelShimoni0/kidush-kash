@@ -49,9 +49,13 @@ npm run dev
 
 ```bash
 npx firebase-tools login
-npx firebase-tools use --add          # בחרו את הפרויקט שיצרתם
+npx firebase-tools use --add          # בוחר פרויקט ויוצר .firebaserc
 npx firebase-tools deploy --only firestore:rules
 ```
+
+> אין בריפו `.firebaserc` בכוונה. הפקודה `use --add` היא שיוצרת אותו עם
+> מזהה הפרויקט האמיתי; קובץ עם מזהה פלייסהולדר גורם לכל פקודת Firebase
+> בתיקייה להיכשל עוד לפני שהיא מתחילה.
 
 באתחול הראשון, אם אוסף `contributions` ריק, האפליקציה זורעת אותו אוטומטית
 ברשימת הפריטים מהעיצוב.
