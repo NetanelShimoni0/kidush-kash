@@ -1,38 +1,23 @@
-import {
-  collection,
-  deleteDoc,
-  doc,
-  getDocs,
-  onSnapshot,
-  orderBy,
-  query,
-  runTransaction,
-  setDoc,
-  writeBatch,
-} from 'firebase/firestore'
-import { db, isFirebaseConfigured } from './firebase'
+import { dbGet, dbPut, dbSubscribe, dbUpdateWithRetry, isDbConfigured } from './realtimeDb'
 import { customTints, initialContributions } from '../data/contributions'
 import type { Contribution } from '../types'
 
-const COLLECTION = 'contributions'
+const PATH = 'contributions'
 const STORAGE_KEY = 'kidush.contributions.v2'
 
+/** צורת הרשומה כפי שהיא נשמרת. RTDB משמיט מערכים ריקים, ולכן families אופציונלי. */
+type StoredItem = Omit<Contribution, 'id' | 'registeredFamilies'> & {
+  registeredFamilies?: string[] | null
+}
+
 export interface ContributionsRepo {
-  /** האזנה רציפה לרשימה. מחזירה פונקציית ניתוק. */
   subscribe(
     onData: (items: Contribution[]) => void,
     onError: (error: unknown) => void,
   ): () => void
-  /** רישום משפחה לפריט קיים */
   register(contributionId: string, familyName: string): Promise<void>
-  /** ביטול רישום של משפחה */
   unregister(contributionId: string, familyName: string): Promise<void>
-  /** הוספת פריט שאינו ברשימה, משויך למשפחה שהוסיפה אותו */
   addCustom(title: string, familyName: string): Promise<void>
-  /**
-   * איפוס: כל השיוכים למשפחות נמחקים והפריטים שנוספו ידנית יורדים מהרשימה.
-   * התוצאה היא רשימת הפריטים המקורית ללא שיוך לאף אחד.
-   */
   reset(): Promise<void>
 }
 
@@ -49,8 +34,36 @@ function makeCustom(title: string, familyName: string, index: number): Contribut
   }
 }
 
+/** ממיר את המפה שמגיעה מ-RTDB לרשימה ממוינת */
+function toList(map: Record<string, StoredItem> | null): Contribution[] {
+  if (!map) return []
+  return Object.entries(map)
+    .map(([id, v]) => ({
+      id,
+      title: v.title,
+      icon: v.icon,
+      tint: v.tint,
+      quantityRequired: v.quantityRequired,
+      registeredFamilies: v.registeredFamilies ?? [],
+      isCustom: v.isCustom ?? false,
+      order: v.order ?? 0,
+    }))
+    .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+}
+
+/** מצב הפתיחה כמפה, מוכן לכתיבה יחידה */
+function seedMap(): Record<string, StoredItem> {
+  const map: Record<string, StoredItem> = {}
+  initialContributions.forEach((item, index) => {
+    const { id, registeredFamilies, ...rest } = item
+    void registeredFamilies
+    map[id] = { ...rest, order: index, isCustom: false }
+  })
+  return map
+}
+
 /* ------------------------------------------------------------------ */
-/* מימוש מקומי — פועל ללא שרת, שומר ב-localStorage                     */
+/* מימוש מקומי — נכנס לפעולה רק אם אין כתובת בסיס נתונים               */
 /* ------------------------------------------------------------------ */
 
 function createLocalRepo(): ContributionsRepo {
@@ -59,7 +72,7 @@ function createLocalRepo(): ContributionsRepo {
       const raw = localStorage.getItem(STORAGE_KEY)
       if (raw) return JSON.parse(raw) as Contribution[]
     } catch {
-      /* אחסון חסום בדפדפן — נופלים חזרה לנתוני הבסיס */
+      /* אחסון חסום בדפדפן */
     }
     return initialContributions
   }
@@ -71,7 +84,7 @@ function createLocalRepo(): ContributionsRepo {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(items))
     } catch {
-      /* אחסון חסום — ממשיכים בזיכרון בלבד */
+      /* ממשיכים בזיכרון בלבד */
     }
     listeners.forEach((fn) => fn(items))
   }
@@ -79,14 +92,12 @@ function createLocalRepo(): ContributionsRepo {
   return {
     subscribe(onData) {
       listeners.add(onData)
-      // דמוי טעינה אסינכרונית כדי שמצב הטעינה יתנהג זהה בשני המימושים
-      const t = setTimeout(() => onData(items), 220)
+      const t = setTimeout(() => onData(items), 200)
       return () => {
         clearTimeout(t)
         listeners.delete(onData)
       }
     },
-
     async register(id, familyName) {
       const target = items.find((c) => c.id === id)
       if (!target) throw { code: 'not-found' }
@@ -99,7 +110,6 @@ function createLocalRepo(): ContributionsRepo {
       )
       emit()
     },
-
     async unregister(id, familyName) {
       items = items.map((c) =>
         c.id === id
@@ -108,13 +118,11 @@ function createLocalRepo(): ContributionsRepo {
       )
       emit()
     },
-
     async addCustom(title, familyName) {
       if (items.some((c) => c.title.trim() === title.trim())) throw { code: 'already-exists' }
       items = [...items, makeCustom(title, familyName, items.length)]
       emit()
     },
-
     async reset() {
       items = initialContributions.map((c) => ({ ...c, registeredFamilies: [] }))
       emit()
@@ -123,109 +131,85 @@ function createLocalRepo(): ContributionsRepo {
 }
 
 /* ------------------------------------------------------------------ */
-/* מימוש Firestore                                                     */
+/* מימוש Realtime Database                                             */
 /* ------------------------------------------------------------------ */
 
-function createFirestoreRepo(): ContributionsRepo {
-  const store = db!
-  const col = collection(store, COLLECTION)
-
-  /** זריעה חד-פעמית של רשימת הפריטים אם האוסף ריק */
+function createRemoteRepo(): ContributionsRepo {
+  /** זריעה חד-פעמית אם הענף ריק */
   async function seedIfEmpty() {
-    const snap = await getDocs(col)
-    if (!snap.empty) return
-    const batch = writeBatch(store)
-    initialContributions.forEach((item, index) => {
-      batch.set(doc(store, COLLECTION, item.id), { ...item, order: index })
-    })
-    await batch.commit()
+    const current = await dbGet<Record<string, StoredItem>>(PATH)
+    if (current && Object.keys(current).length > 0) return
+    await dbPut(PATH, seedMap())
+  }
+
+  const load = async (onData: (items: Contribution[]) => void) => {
+    const map = await dbGet<Record<string, StoredItem>>(PATH)
+    onData(toList(map))
   }
 
   return {
     subscribe(onData, onError) {
       let active = true
-      seedIfEmpty().catch(onError)
+      const push = (items: Contribution[]) => {
+        if (active) onData(items)
+      }
 
-      const unsub = onSnapshot(
-        query(col, orderBy('order')),
-        (snap) => {
-          if (!active) return
-          onData(
-            snap.docs.map((d) => {
-              const data = d.data() as Omit<Contribution, 'id'>
-              return {
-                id: d.id,
-                title: data.title,
-                icon: data.icon,
-                tint: data.tint,
-                quantityRequired: data.quantityRequired,
-                registeredFamilies: data.registeredFamilies ?? [],
-                isCustom: data.isCustom ?? false,
-                order: data.order,
-              }
-            }),
-          )
+      seedIfEmpty()
+        .then(() => load(push))
+        .catch(onError)
+
+      const stop = dbSubscribe(
+        PATH,
+        () => {
+          load(push).catch(onError)
         },
         onError,
       )
 
       return () => {
         active = false
-        unsub()
+        stop()
       }
     },
 
     async register(id, familyName) {
-      const ref = doc(store, COLLECTION, id)
-      // טרנזקציה מונעת מצב שבו שתי משפחות תופסות את המקום האחרון בו-זמנית
-      await runTransaction(store, async (tx) => {
-        const snap = await tx.get(ref)
-        if (!snap.exists()) throw { code: 'not-found' }
-        const data = snap.data() as Contribution
-        const families = data.registeredFamilies ?? []
+      await dbUpdateWithRetry<StoredItem>(`${PATH}/${id}`, (item) => {
+        if (!item) throw { code: 'not-found' }
+        const families = item.registeredFamilies ?? []
         if (families.includes(familyName)) throw { code: 'already-exists' }
-        if (families.length >= data.quantityRequired) throw { code: 'failed-precondition' }
-        tx.update(ref, { registeredFamilies: [...families, familyName] })
+        if (families.length >= item.quantityRequired) throw { code: 'failed-precondition' }
+        return { ...item, registeredFamilies: [...families, familyName] }
       })
     },
 
     async unregister(id, familyName) {
-      const ref = doc(store, COLLECTION, id)
-      await runTransaction(store, async (tx) => {
-        const snap = await tx.get(ref)
-        if (!snap.exists()) throw { code: 'not-found' }
-        const data = snap.data() as Contribution
-        tx.update(ref, {
-          registeredFamilies: (data.registeredFamilies ?? []).filter((f) => f !== familyName),
-        })
+      await dbUpdateWithRetry<StoredItem>(`${PATH}/${id}`, (item) => {
+        if (!item) throw { code: 'not-found' }
+        const families = (item.registeredFamilies ?? []).filter((f) => f !== familyName)
+        // RTDB מוחק מפתח שערכו מערך ריק, וזה בדיוק ההתנהגות הרצויה
+        return { ...item, registeredFamilies: families.length ? families : null }
       })
     },
 
     async addCustom(title, familyName) {
-      const snap = await getDocs(col)
-      if (snap.docs.some((d) => (d.data().title as string)?.trim() === title.trim())) {
-        throw { code: 'already-exists' }
-      }
-      const item = makeCustom(title, familyName, snap.size)
-      await setDoc(doc(store, COLLECTION, item.id), item)
+      const map = await dbGet<Record<string, StoredItem>>(PATH)
+      const existing = map ? Object.values(map) : []
+      if (existing.some((c) => c.title?.trim() === title.trim())) throw { code: 'already-exists' }
+      const item = makeCustom(title, familyName, existing.length)
+      const { id, ...rest } = item
+      await dbPut(`${PATH}/${id}`, rest)
     },
 
     async reset() {
-      const snap = await getDocs(col)
-      // הפריטים שנוספו ידנית נמחקים; השאר חוזרים לרשימה נקייה משיוכים
-      await Promise.all(
-        snap.docs.filter((d) => d.data().isCustom === true).map((d) => deleteDoc(d.ref)),
-      )
-      const batch = writeBatch(store)
-      initialContributions.forEach((item, index) => {
-        batch.set(doc(store, COLLECTION, item.id), { ...item, registeredFamilies: [], order: index })
-      })
-      await batch.commit()
+      // כתיבה יחידה של מצב הפתיחה מוחקת גם את הפריטים שנוספו ידנית
+      await dbPut(PATH, seedMap())
     },
   }
 }
 
-export const contributionsRepo: ContributionsRepo =
-  isFirebaseConfigured && db ? createFirestoreRepo() : createLocalRepo()
+export const contributionsRepo: ContributionsRepo = isDbConfigured
+  ? createRemoteRepo()
+  : createLocalRepo()
 
-export const dataSource: 'firebase' | 'local' = isFirebaseConfigured && db ? 'firebase' : 'local'
+export const dataSource: 'remote' | 'local' = isDbConfigured ? 'remote' : 'local'
+

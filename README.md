@@ -40,7 +40,44 @@ npm run dev
 
 ---
 
-## חיבור Firebase (תוכנית Spark – חינם)
+## Firebase Realtime Database
+
+הנתונים מסונכרנים בין כל המשפחות דרך Realtime Database, **בלי ה-SDK** —
+רק ה-REST API וזרם ה-SSE שהוא חושף. זה חוסך כ-334KB מהחבילה ומוותר על
+הצורך במפתח API בכלל.
+
+| פעולה | איך |
+| --- | --- |
+| קריאה | `GET /contributions.json` |
+| עדכון חי | `EventSource` על אותה כתובת (אירועי `put` / `patch`) |
+| רישום | קריאה עם `X-Firebase-ETag` וכתיבה עם `if-match` |
+| הוספת פריט | `PUT /contributions/<id>.json` |
+| איפוס | `PUT /contributions.json` עם מצב הפתיחה |
+
+הכתיבה המותנית ב-ETag היא מה שמונע משתי משפחות לתפוס את אותו מקום: אם
+מישהו הקדים, השרת מחזיר 412 והפעולה חוזרת עם הערך העדכני.
+
+הכתובת נמצאת ב-`src/lib/realtimeDb.ts` וניתנת לדריסה דרך `VITE_RTDB_URL`.
+ללא כתובת האפליקציה עובדת מקומית מול `localStorage`.
+
+### חוקי אבטחה
+
+`database.rules.json` מגביל את מבנה הנתונים ומונע כתיבה מחוץ ל-`contributions`.
+לפרסום:
+
+```bash
+npx firebase-tools login
+npx firebase-tools use kidush-kash
+npx firebase-tools deploy --only database
+```
+
+> **הבסיס פתוח כרגע לכתיבה מכל מקום.** כל מי שמגיע לכתובת יכול לשנות או
+> למחוק את הרשימה. פרסום החוקים מצמצם את זה למבנה תקין בלבד, אבל לא מגביל
+> *מי* כותב — לשם כך נדרש Firebase Auth.
+
+---
+
+## ~~חיבור Firebase (תוכנית Spark – חינם)~~ (הוחלף במקטע שמעל)
 
 1. פתחו פרויקט חדש ב-[Firebase Console](https://console.firebase.google.com).
 2. **Build → Firestore Database → Create database** במצב Production.

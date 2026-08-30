@@ -1,0 +1,27 @@
+{
+  "rules": {
+    ".read": true,
+    ".write": false,
+
+    "contributions": {
+      ".read": true,
+      ".write": true,
+      ".validate": "newData.hasChildren() || newData.val() == null",
+
+      "$item": {
+        ".validate": "newData.hasChildren(['title','icon','tint','quantityRequired'])",
+        "title":            { ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 80" },
+        "icon":             { ".validate": "newData.isString()" },
+        "tint":             { ".validate": "newData.isString()" },
+        "quantityRequired": { ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 50" },
+        "order":            { ".validate": "newData.isNumber()" },
+        "isCustom":         { ".validate": "newData.isBoolean()" },
+        "registeredFamilies": {
+          ".validate": "newData.val() == null || newData.hasChildren()",
+          "$index": { ".validate": "newData.isString() && newData.val().length <= 60" }
+        },
+        "$other": { ".validate": false }
+      }
+    }
+  }
+}
