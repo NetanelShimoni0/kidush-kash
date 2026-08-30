@@ -7,7 +7,7 @@ const base = {
   viewBox: '0 0 24 24',
   fill: 'none',
   stroke: 'currentColor',
-  strokeWidth: 1.5,
+  strokeWidth: 1.9,
   strokeLinecap: 'round' as const,
   strokeLinejoin: 'round' as const,
   'aria-hidden': true,
@@ -125,6 +125,18 @@ export function IcedCoffeeIcon(p: P) {
   )
 }
 
+/** פריט שנוסף על ידי משפחה דרך "אחר" */
+export function DishIcon(p: P) {
+  return (
+    <svg {...base} {...p}>
+      <path d="M2.9 19.6h18.2" />
+      <path d="M4.5 19.6a7.5 7.5 0 0 1 15 0" />
+      <path d="M12 12.1v-1.7" />
+      <circle cx="12" cy="9.1" r="1.3" />
+    </svg>
+  )
+}
+
 const registry: Record<FoodIconName, (p: P) => JSX.Element> = {
   cake: CakeIcon,
   cookie: CookieIcon,
@@ -135,6 +147,7 @@ const registry: Record<FoodIconName, (p: P) => JSX.Element> = {
   apple: AppleIcon,
   kugel: KugelIcon,
   icedCoffee: IcedCoffeeIcon,
+  dish: DishIcon,
 }
 
 export function FoodIcon({ name, ...rest }: { name: FoodIconName } & P) {

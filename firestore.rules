@@ -8,17 +8,16 @@ service cloud.firestore {
       // Everyone may read the kiddush list.
       allow read: if true;
 
-      // Seeding the initial list is allowed only for well-formed documents.
-      allow create: if isValidShape(request.resource.data);
+      // Seeding the list, adding an item through the "אחר" card, and the
+      // admin reset all write whole documents, so every write is checked
+      // against the document shape instead of against a field allowlist.
+      allow create, update: if isValidShape(request.resource.data)
+                            && request.resource.data.registeredFamilies.size()
+                               <= request.resource.data.quantityRequired;
 
-      // The only mutable field is the list of registered families, and it can
-      // never exceed the number of volunteers the item asks for.
-      allow update: if onlyFamiliesChanged()
-                    && isValidFamilies(request.resource.data.registeredFamilies)
-                    && request.resource.data.registeredFamilies.size()
-                       <= resource.data.quantityRequired;
-
-      allow delete: if false;
+      // Only items a family added themselves can be removed, which is what
+      // the reset does. The nine seeded items can never be deleted.
+      allow delete: if resource.data.isCustom == true;
     }
 
     // Nothing else is reachable from the client.
@@ -34,15 +33,12 @@ service cloud.firestore {
            && data.tint is string
            && data.quantityRequired is int
            && data.quantityRequired >= 1 && data.quantityRequired <= 50
-           && isValidFamilies(data.registeredFamilies);
-  }
-
-  function isValidFamilies(families) {
-    return families is list && families.size() <= 50;
-  }
-
-  function onlyFamiliesChanged() {
-    return request.resource.data.diff(resource.data).affectedKeys()
-           .hasOnly(['registeredFamilies']);
+           && data.registeredFamilies is list
+           && data.registeredFamilies.size() <= 50;
   }
 }
+
+// NOTE: this project has no authentication layer, so these rules constrain the
+// shape of the data but not who may write it. The reset password is checked in
+// the browser only. To make the reset genuinely privileged, add Firebase Auth,
+// move the reset behind a Cloud Function, and require a custom claim here.

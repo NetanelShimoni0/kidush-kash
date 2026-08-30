@@ -1,17 +1,22 @@
 /* =================================================================
-   פאנל "מה מביאים?" — חופף על ה-Hero, בדיוק כמו בעיצוב הייחוס
+   פאנל "מה מביאים?"
+
+   בעיצוב הייחוס הפאנל אינו נוגע בקצוות המסך: הוא מוסט פנימה בכ-2%
+   מכל צד (18 מתוך 863 פיקסלים), עם פינות עליונות מעוגלות, והרקע
+   הוורוד נשאר גלוי ברצועות שמשני צדיו.
    ================================================================= */
 .panel {
   position: relative;
   z-index: 5;
   direction: rtl;
-  margin-top: -68px;
+  margin-top: clamp(-60px, -5.3vw, -40px);
+  padding-inline: var(--pad-side);
 }
 
 .panel__inner {
   max-width: 1020px;
   margin-inline: auto;
-  padding: 30px var(--pad-side) 44px;
+  padding: clamp(26px, 3.9vw, 34px) var(--card-inset) clamp(40px, 5.5vw, 48px);
   background: var(--c-panel);
   border-radius: var(--r-panel) var(--r-panel) 0 0;
   box-shadow: var(--sh-panel);
@@ -23,7 +28,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-bottom: 26px;
+  margin-bottom: clamp(22px, 3.2vw, 28px);
 }
 
 .panel__title {
@@ -37,13 +42,15 @@
 }
 
 .panel__title svg {
+  width: 1.05em;
+  height: 1.05em;
   color: var(--c-rose);
 }
 
 .panel__squiggle {
-  width: 168px;
-  height: 13px;
-  margin-top: 7px;
+  width: clamp(168px, 24vw, 208px);
+  height: clamp(13px, 1.9vw, 17px);
+  margin-top: clamp(7px, 1vw, 9px);
 }
 
 /* ---------- הרשימה ---------- */
@@ -60,13 +67,13 @@
 .row__btn {
   display: flex;
   align-items: center;
-  gap: 13px;
+  gap: clamp(12px, 1.9vw, 17px);
   width: 100%;
-  min-height: 74px;
-  padding: 12px 14px;
+  min-height: var(--card-h);
+  padding: clamp(10px, 1.4vw, 12px) clamp(12px, 1.7vw, 15px);
   border-radius: var(--r-card);
   background: var(--c-surface);
-  border: 1px solid var(--c-hairline);
+  border: 1px solid transparent;
   box-shadow: var(--sh-card);
   text-align: right;
   transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
@@ -74,7 +81,7 @@
 
 .row__btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(148, 92, 116, 0.12);
+  box-shadow: 0 8px 18px rgba(150, 100, 120, 0.12);
   border-color: var(--c-rose-line);
 }
 
@@ -83,28 +90,34 @@
 }
 
 .row__btn--done {
-  background: #FDFBFC;
+  background: #FEFBFC;
 }
 
-/* ---------- עיגול האייקון (הצד הימני של הכרטיס) ---------- */
+/* ---------- עיגול האייקון (הצד הימני של הכרטיס) ----------
+   בעיצוב קוטר העיגול הוא כ-73% מגובה הכרטיס.                */
 .row__icon {
   display: grid;
   place-items: center;
-  width: 50px;
-  height: 50px;
+  width: var(--icon-d);
+  height: var(--icon-d);
   border-radius: 50%;
   flex: none;
 }
 
+.row__icon svg {
+  width: 56%;
+  height: 56%;
+}
+
 .row__icon--pink     { background: var(--t-pink-bg);     color: var(--t-pink-fg); }
 .row__icon--peach    { background: var(--t-peach-bg);    color: var(--t-peach-fg); }
+.row__icon--apricot  { background: var(--t-apricot-bg);  color: var(--t-apricot-fg); }
 .row__icon--lavender { background: var(--t-lavender-bg); color: var(--t-lavender-fg); }
-.row__icon--mint     { background: var(--t-mint-bg);     color: var(--t-mint-fg); }
+.row__icon--teal     { background: var(--t-teal-bg);     color: var(--t-teal-fg); }
 
 .row__icon--add {
-  background: #FBDCE6;
-  color: var(--c-rose);
-  box-shadow: 0 0 0 1.5px rgba(224, 65, 111, 0.22);
+  background: var(--c-plus-bg);
+  color: var(--c-plus-fg);
 }
 
 /* ---------- טקסט ---------- */
@@ -141,40 +154,51 @@
   align-items: center;
   gap: 6px;
   flex: none;
-  width: 84px;
+  width: var(--bar-w);
 }
 
 .row__count {
-  font-size: 13px;
+  font-size: var(--fs-meta);
   font-weight: 600;
-  color: var(--c-ink);
+  color: var(--c-ink-soft);
 }
 
+/*
+  בעיצוב הייחוס פס ההתקדמות מתמלא משמאל לימין — נמדד בפיקסלים על קובץ
+  המקור: המסילה נמצאת ב-x 133..238 והמילוי ב-x 133..186 עבור 2/4.
+  לכן הפס עצמו מוגדר כ-LTR, בניגוד לשאר הממשק שהוא RTL מלא.
+  להיפוך לכיוון RTL: להחליף את direction ל-rtl בשורה למטה.
+*/
 .bar {
   display: block;
+  direction: ltr;
   width: 100%;
-  height: 5px;
+  height: clamp(5px, 0.7vw, 6px);
   border-radius: var(--r-pill);
   background: var(--c-rose-soft);
   overflow: hidden;
 }
 
-/* בכיוון RTL הבלוק מתחיל מהקצה הימני — המילוי מתקדם ימין ← שמאל */
 .bar__fill {
   display: block;
   height: 100%;
   border-radius: var(--r-pill);
-  background: var(--c-rose);
+  background: var(--c-rose-bar);
   transition: width 0.4s cubic-bezier(0.22, 0.7, 0.3, 1);
 }
 
 /* ---------- צ׳בון (הקצה השמאלי) ---------- */
+.row__chevron svg {
+  width: 82%;
+  height: 82%;
+}
+
 .row__chevron {
   display: grid;
   place-items: center;
   flex: none;
-  width: 22px;
-  color: #A9A3BE;
+  width: clamp(20px, 2.7vw, 24px);
+  color: var(--c-chevron);
   transition: transform 0.18s ease, color 0.18s ease;
 }
 
@@ -184,15 +208,20 @@
 }
 
 /* ---------- מצב הושלם ---------- */
+.row__done svg {
+  width: 50%;
+  height: 50%;
+}
+
 .row__done {
   display: grid;
   place-items: center;
   flex: none;
-  width: 34px;
-  height: 34px;
+  width: clamp(34px, 4.6vw, 40px);
+  height: clamp(34px, 4.6vw, 40px);
   border-radius: 50%;
-  background: var(--t-mint-bg);
-  color: var(--t-mint-fg);
+  background: var(--c-done-bg);
+  color: var(--c-done-fg);
   margin-inline-end: 4px;
 }
 
@@ -204,7 +233,7 @@
 }
 
 .row__btn--other:hover {
-  background: #FCEDF2;
+  background: #FCEDF1;
   border-color: var(--c-rose);
   box-shadow: none;
 }
@@ -250,16 +279,16 @@
 .sk {
   display: block;
   border-radius: var(--r-pill);
-  background: linear-gradient(90deg, #F6EFF2 25%, #FBF6F8 50%, #F6EFF2 75%);
+  background: linear-gradient(90deg, #F7F0F2 25%, #FCF7F9 50%, #F7F0F2 75%);
   background-size: 400% 100%;
   animation: sk-shimmer 1.3s ease-in-out infinite;
 }
 
-.sk--circle { width: 50px; height: 50px; border-radius: 50%; flex: none; }
+.sk--circle { width: var(--icon-d); height: var(--icon-d); border-radius: 50%; flex: none; }
 .sk--line   { height: 11px; }
 .sk--w60    { width: 62%; }
 .sk--w40    { width: 40%; }
-.sk--bar    { width: 84px; height: 5px; flex: none; }
+.sk--bar    { width: var(--bar-w); height: 5px; flex: none; }
 
 @keyframes sk-shimmer {
   0%   { background-position: 100% 0; }
@@ -268,61 +297,42 @@
 
 /* ================= מסכים בינוניים ================= */
 @media (min-width: 560px) {
-  .panel { margin-top: -80px; }
-
   .panel__inner {
-    padding: 38px var(--pad-side) 56px;
+    min-height: 56vh;
   }
-
-  .panel__squiggle { width: 196px; height: 15px; }
-
-  /*
-    בטאבלט הפאנל נשאר לרוחב מלא, אבל הרשימה עצמה מוגבלת לעמודה מרוכזת.
-    בלי זה הכרטיס נמתח ונוצר שטח מת בין שמות המשפחות לפס ההתקדמות.
-  */
-  .panel__list {
-    max-width: 640px;
-    margin-inline: auto;
-  }
-
-  .row__btn   { min-height: 84px; padding: 14px 16px; gap: 15px; }
-  .row__icon  { width: 58px; height: 58px; }
-  .sk--circle { width: 58px; height: 58px; }
-  .row__status { width: 96px; }
-  .row__count { font-size: 13.5px; }
 }
 
 /* ================= מחשב שולחני ================= */
 @media (min-width: 900px) {
-  .panel { margin-top: -96px; padding-inline: var(--pad-side); }
+  .panel { margin-top: -88px; }
 
   .panel__inner {
-    padding: 48px 40px 60px;
+    padding: 46px 38px 56px;
     border-radius: var(--r-panel);
     min-height: 0;
   }
 
-  .panel__head { margin-bottom: 36px; }
+  .panel__head { margin-bottom: 34px; }
   .panel__title { font-size: 32px; }
   .panel__title svg { width: 32px; height: 32px; }
   .panel__squiggle { width: 232px; height: 17px; }
 
   /*
     שתי עמודות בלבד. שלוש עמודות מצרות את הכרטיס עד כדי גלישת הכותרת
-    לשלוש שורות וקטיעת שמות המשפחות, ולכן המבנה הפנימי של הכרטיס נשמר
-    זהה לחלוטין לגרסת המובייל.
+    לשלוש שורות וקטיעת שמות המשפחות, ולכן המבנה הפנימי של הכרטיס
+    נשאר זהה לחלוטין לגרסת המובייל.
   */
   .panel__list {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 16px;
+    gap: 14px;
     align-items: stretch;
     max-width: none;
   }
 
-  .row__btn { height: 100%; min-height: 88px; padding: 16px 18px; }
-  .row__icon { width: 60px; height: 60px; }
-  .row__status { width: 104px; }
+  .row__btn { height: 100%; min-height: 90px; padding: 15px 17px; }
+  .row__icon { width: 64px; height: 64px; }
+  .row__status { width: 100px; }
 
   /* כרטיס "אחר" נפרש על שתי העמודות */
   .row--other { grid-column: 1 / -1; }
@@ -332,6 +342,6 @@
 }
 
 @media (min-width: 1240px) {
-  .panel__inner { padding: 54px 48px 60px; }
-  .panel__list { gap: 18px; }
+  .panel__inner { padding: 52px 46px 60px; }
+  .panel__list { gap: 16px; }
 }

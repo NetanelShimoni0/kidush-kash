@@ -139,20 +139,16 @@ export function RegistrationDialog({ item, onClose, onRegister, onUnregister }: 
               autoComplete="family-name"
               value={familyName}
               aria-invalid={showError ? true : undefined}
-              aria-describedby={showError ? 'family-name-error' : 'family-name-hint'}
+              aria-describedby={showError ? 'family-name-error' : undefined}
               onChange={(e) => setFamilyName(e.target.value)}
               onBlur={() => setTouched(true)}
               onKeyDown={(e) => {
                 if (e.key === 'Enter') void submit()
               }}
             />
-            {showError ? (
+            {showError && (
               <span className="field__error" id="family-name-error" role="alert">
                 {validationError}
-              </span>
-            ) : (
-              <span className="field__hint" id="family-name-hint">
-                נוסיף את המילה &quot;משפחת&quot; באופן אוטומטי
               </span>
             )}
           </div>

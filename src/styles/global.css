@@ -27,7 +27,7 @@ body {
   font-size: var(--fs-body);
   color: var(--c-ink);
   text-align: right;
-  background: linear-gradient(180deg, var(--c-bg-top) 0%, var(--c-bg-bottom) 100%);
+  background: var(--c-bg-flat);
   background-attachment: fixed;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;

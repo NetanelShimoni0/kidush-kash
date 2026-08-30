@@ -1,4 +1,4 @@
-export type IconTint = 'pink' | 'peach' | 'lavender' | 'mint'
+export type IconTint = 'pink' | 'peach' | 'apricot' | 'lavender' | 'teal'
 
 export type FoodIconName =
   | 'cake'
@@ -10,6 +10,7 @@ export type FoodIconName =
   | 'apple'
   | 'kugel'
   | 'icedCoffee'
+  | 'dish'
 
 export interface Contribution {
   id: string
@@ -17,11 +18,15 @@ export interface Contribution {
   title: string
   icon: FoodIconName
   tint: IconTint
-  /**
-   * מספר המתנדבים הדרוש. כאשר הערך הוא 1 — הפריט מוצג כמשימה בודדת
-   * עם סימון "הושלם" במקום פס התקדמות (כפי שמופיע בעיצוב).
-   */
+  /** מספר המתנדבים הדרוש — מוצג בפס ההתקדמות ולא בכותרת */
   quantityRequired: number
   /** שמות המשפחות שנרשמו עד כה */
   registeredFamilies: string[]
+  /**
+   * פריט שנוסף על ידי משפחה דרך כרטיס "אחר".
+   * פריטים כאלה נמחקים לגמרי באיפוס הרשימה.
+   */
+  isCustom?: boolean
+  /** סדר התצוגה */
+  order?: number
 }

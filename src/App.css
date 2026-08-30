@@ -17,6 +17,10 @@
 }
 
 .app__footer-title {
+  display: inline-block;
+  cursor: default;
+  user-select: none;
+  -webkit-user-select: none;
   font-size: 15px;
   font-weight: 700;
   color: var(--c-rose);

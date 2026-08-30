@@ -1,19 +1,21 @@
 import {
   collection,
+  deleteDoc,
   doc,
   getDocs,
   onSnapshot,
   orderBy,
   query,
   runTransaction,
+  setDoc,
   writeBatch,
 } from 'firebase/firestore'
 import { db, isFirebaseConfigured } from './firebase'
-import { initialContributions } from '../data/contributions'
+import { customTints, initialContributions } from '../data/contributions'
 import type { Contribution } from '../types'
 
 const COLLECTION = 'contributions'
-const STORAGE_KEY = 'kidush.contributions.v1'
+const STORAGE_KEY = 'kidush.contributions.v2'
 
 export interface ContributionsRepo {
   /** האזנה רציפה לרשימה. מחזירה פונקציית ניתוק. */
@@ -21,46 +23,57 @@ export interface ContributionsRepo {
     onData: (items: Contribution[]) => void,
     onError: (error: unknown) => void,
   ): () => void
-  /** רישום משפחה לפריט */
+  /** רישום משפחה לפריט קיים */
   register(contributionId: string, familyName: string): Promise<void>
   /** ביטול רישום של משפחה */
   unregister(contributionId: string, familyName: string): Promise<void>
+  /** הוספת פריט שאינו ברשימה, משויך למשפחה שהוסיפה אותו */
+  addCustom(title: string, familyName: string): Promise<void>
+  /**
+   * איפוס: כל השיוכים למשפחות נמחקים והפריטים שנוספו ידנית יורדים מהרשימה.
+   * התוצאה היא רשימת הפריטים המקורית ללא שיוך לאף אחד.
+   */
+  reset(): Promise<void>
+}
+
+function makeCustom(title: string, familyName: string, index: number): Contribution {
+  return {
+    id: `custom-${Date.now()}-${index}`,
+    title,
+    icon: 'dish',
+    tint: customTints[index % customTints.length],
+    quantityRequired: 1,
+    registeredFamilies: [familyName],
+    isCustom: true,
+    order: 1000 + index,
+  }
 }
 
 /* ------------------------------------------------------------------ */
 /* מימוש מקומי — פועל ללא שרת, שומר ב-localStorage                     */
 /* ------------------------------------------------------------------ */
 
-function readLocal(): Contribution[] {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    if (raw) return JSON.parse(raw) as Contribution[]
-  } catch {
-    /* אחסון חסום בדפדפן — נופלים חזרה לנתוני הבסיס */
-  }
-  return initialContributions
-}
-
-function writeLocal(items: Contribution[]) {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(items))
-  } catch {
-    /* אחסון חסום — ממשיכים בזיכרון בלבד */
-  }
-}
-
 function createLocalRepo(): ContributionsRepo {
-  let items = readLocal()
+  const read = (): Contribution[] => {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY)
+      if (raw) return JSON.parse(raw) as Contribution[]
+    } catch {
+      /* אחסון חסום בדפדפן — נופלים חזרה לנתוני הבסיס */
+    }
+    return initialContributions
+  }
+
+  let items = read()
   const listeners = new Set<(items: Contribution[]) => void>()
 
   const emit = () => {
-    writeLocal(items)
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(items))
+    } catch {
+      /* אחסון חסום — ממשיכים בזיכרון בלבד */
+    }
     listeners.forEach((fn) => fn(items))
-  }
-
-  const mutate = (id: string, fn: (c: Contribution) => Contribution) => {
-    items = items.map((c) => (c.id === id ? fn(c) : c))
-    emit()
   }
 
   return {
@@ -73,6 +86,7 @@ function createLocalRepo(): ContributionsRepo {
         listeners.delete(onData)
       }
     },
+
     async register(id, familyName) {
       const target = items.find((c) => c.id === id)
       if (!target) throw { code: 'not-found' }
@@ -80,13 +94,30 @@ function createLocalRepo(): ContributionsRepo {
       if (target.registeredFamilies.length >= target.quantityRequired) {
         throw { code: 'failed-precondition' }
       }
-      mutate(id, (c) => ({ ...c, registeredFamilies: [...c.registeredFamilies, familyName] }))
+      items = items.map((c) =>
+        c.id === id ? { ...c, registeredFamilies: [...c.registeredFamilies, familyName] } : c,
+      )
+      emit()
     },
+
     async unregister(id, familyName) {
-      mutate(id, (c) => ({
-        ...c,
-        registeredFamilies: c.registeredFamilies.filter((f) => f !== familyName),
-      }))
+      items = items.map((c) =>
+        c.id === id
+          ? { ...c, registeredFamilies: c.registeredFamilies.filter((f) => f !== familyName) }
+          : c,
+      )
+      emit()
+    },
+
+    async addCustom(title, familyName) {
+      if (items.some((c) => c.title.trim() === title.trim())) throw { code: 'already-exists' }
+      items = [...items, makeCustom(title, familyName, items.length)]
+      emit()
+    },
+
+    async reset() {
+      items = initialContributions.map((c) => ({ ...c, registeredFamilies: [] }))
+      emit()
     },
   }
 }
@@ -129,6 +160,8 @@ function createFirestoreRepo(): ContributionsRepo {
                 tint: data.tint,
                 quantityRequired: data.quantityRequired,
                 registeredFamilies: data.registeredFamilies ?? [],
+                isCustom: data.isCustom ?? false,
+                order: data.order,
               }
             }),
           )
@@ -166,6 +199,28 @@ function createFirestoreRepo(): ContributionsRepo {
           registeredFamilies: (data.registeredFamilies ?? []).filter((f) => f !== familyName),
         })
       })
+    },
+
+    async addCustom(title, familyName) {
+      const snap = await getDocs(col)
+      if (snap.docs.some((d) => (d.data().title as string)?.trim() === title.trim())) {
+        throw { code: 'already-exists' }
+      }
+      const item = makeCustom(title, familyName, snap.size)
+      await setDoc(doc(store, COLLECTION, item.id), item)
+    },
+
+    async reset() {
+      const snap = await getDocs(col)
+      // הפריטים שנוספו ידנית נמחקים; השאר חוזרים לרשימה נקייה משיוכים
+      await Promise.all(
+        snap.docs.filter((d) => d.data().isCustom === true).map((d) => deleteDoc(d.ref)),
+      )
+      const batch = writeBatch(store)
+      initialContributions.forEach((item, index) => {
+        batch.set(doc(store, COLLECTION, item.id), { ...item, registeredFamilies: [], order: index })
+      })
+      await batch.commit()
     },
   }
 }

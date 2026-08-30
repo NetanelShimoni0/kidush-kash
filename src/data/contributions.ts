@@ -1,80 +1,22 @@
 import type { Contribution } from '../types'
 
 /**
- * הנתונים תואמים אחד לאחד לרשימה שבעיצוב הייחוס.
- * בהמשך אפשר להחליף את המקור הזה בקריאה לשרת מבלי לגעת ברכיבי התצוגה.
+ * מצב הפתיחה של המערכת: רשימת הפריטים בלבד, ללא שיוך למשפחות.
+ * זהו גם המצב שאליו חוזרים אחרי איפוס.
+ *
+ * מספר המתנדבים הדרוש מופיע בפס ההתקדמות בלבד, ולכן הוא אינו חלק מהכותרת.
  */
 export const initialContributions: Contribution[] = [
-  {
-    id: 'cakes',
-    title: 'עוגות (עד 4 מתנדבים)',
-    icon: 'cake',
-    tint: 'pink',
-    quantityRequired: 4,
-    registeredFamilies: ['משפחת לוי', 'משפחת כהן'],
-  },
-  {
-    id: 'cookies',
-    title: 'עוגיות',
-    icon: 'cookie',
-    tint: 'peach',
-    quantityRequired: 1,
-    registeredFamilies: ['משפחת ישראלי', 'משפחת בר'],
-  },
-  {
-    id: 'sweet-pastries',
-    title: 'מאפים מתוקים',
-    icon: 'croissant',
-    tint: 'lavender',
-    quantityRequired: 2,
-    registeredFamilies: ['משפחת אברמוביץ׳'],
-  },
-  {
-    id: 'savory-pastries',
-    title: 'מאפים מלוחים',
-    icon: 'muffin',
-    tint: 'mint',
-    quantityRequired: 2,
-    registeredFamilies: ['משפחת שטרן', 'משפחת רוזן'],
-  },
-  {
-    id: 'snacks',
-    title: 'חטיפים + ופלים',
-    icon: 'candy',
-    tint: 'pink',
-    quantityRequired: 2,
-    registeredFamilies: ['משפחת דוידי'],
-  },
-  {
-    id: 'cut-vegetables',
-    title: 'ירקות חתוכים',
-    icon: 'carrot',
-    tint: 'peach',
-    quantityRequired: 1,
-    registeredFamilies: ['משפחת גולדשטיין'],
-  },
-  {
-    id: 'cut-fruits',
-    title: 'פירות חתוכים',
-    icon: 'apple',
-    tint: 'pink',
-    quantityRequired: 2,
-    registeredFamilies: ['משפחת מזרחי'],
-  },
-  {
-    id: 'kugel',
-    title: 'קיגל (מספר מתנדבים)',
-    icon: 'kugel',
-    tint: 'lavender',
-    quantityRequired: 3,
-    registeredFamilies: ['משפחת פרידמן', 'משפחת הלוי'],
-  },
-  {
-    id: 'iced-coffee',
-    title: 'קפה קר (3 בקבוקים)',
-    icon: 'icedCoffee',
-    tint: 'pink',
-    quantityRequired: 3,
-    registeredFamilies: ['משפחת רגב', 'משפחת קמחי'],
-  },
+  { id: 'cakes',            title: 'עוגות',          icon: 'cake',       tint: 'pink',     quantityRequired: 4, registeredFamilies: [] },
+  { id: 'cookies',          title: 'עוגיות',         icon: 'cookie',     tint: 'peach',    quantityRequired: 1, registeredFamilies: [] },
+  { id: 'sweet-pastries',   title: 'מאפים מתוקים',   icon: 'croissant',  tint: 'lavender', quantityRequired: 2, registeredFamilies: [] },
+  { id: 'savory-pastries',  title: 'מאפים מלוחים',   icon: 'muffin',     tint: 'teal',     quantityRequired: 2, registeredFamilies: [] },
+  { id: 'snacks',           title: 'חטיפים + ופלים', icon: 'candy',      tint: 'pink',     quantityRequired: 2, registeredFamilies: [] },
+  { id: 'cut-vegetables',   title: 'ירקות חתוכים',   icon: 'carrot',     tint: 'apricot',  quantityRequired: 1, registeredFamilies: [] },
+  { id: 'cut-fruits',       title: 'פירות חתוכים',   icon: 'apple',      tint: 'pink',     quantityRequired: 2, registeredFamilies: [] },
+  { id: 'kugel',            title: 'קיגל',           icon: 'kugel',      tint: 'lavender', quantityRequired: 3, registeredFamilies: [] },
+  { id: 'iced-coffee',      title: 'קפה קר',         icon: 'icedCoffee', tint: 'pink',     quantityRequired: 3, registeredFamilies: [] },
 ]
+
+/** גוונים מתחלפים לפריטים שמשפחות מוסיפות דרך כרטיס "אחר" */
+export const customTints = ['pink', 'lavender', 'teal', 'apricot', 'peach'] as const

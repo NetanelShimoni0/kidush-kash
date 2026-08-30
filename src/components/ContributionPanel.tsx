@@ -106,14 +106,14 @@ export function ContributionPanel({
                   type="button"
                   className="row__btn row__btn--other"
                   onClick={onOpenOther}
-                  aria-label="אחר — לחצו כדי לראות מה אחרים מביאים"
+                  aria-label="אחר — הוספת פריט שאינו ברשימה"
                 >
                   <span className="row__icon row__icon--add" aria-hidden>
                     <PlusIcon width={24} height={24} />
                   </span>
                   <span className="row__text">
                     <span className="row__title">אחר</span>
-                    <span className="row__families">לחצו כדי לראות מה אחרים מביאים</span>
+                    <span className="row__families">מביאים משהו שלא ברשימה? הוסיפו אותו</span>
                   </span>
                 </button>
               </li>

@@ -15,7 +15,7 @@ export function ContributionRow({ item, onOpen }: Props) {
   const isSingle = total <= 1
   const isDone = isSingle && filled > 0
 
-  const families = filled > 0 ? item.registeredFamilies.join(', ') : 'עדיין לא נרשמה משפחה'
+  const families = filled > 0 ? item.registeredFamilies.join(', ') : 'אין נרשמים'
 
   return (
     <li className="row">

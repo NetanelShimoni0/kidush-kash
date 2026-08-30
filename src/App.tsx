@@ -1,38 +1,26 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { AppHeader } from './components/AppHeader'
 import { Hero } from './components/Hero'
 import { ContributionPanel } from './components/ContributionPanel'
 import { RegistrationDialog } from './components/RegistrationDialog'
-import { OthersDialog } from './components/OthersDialog'
-import { NotificationsSheet, type AppNotification } from './components/NotificationsSheet'
-import { MenuDrawer } from './components/MenuDrawer'
-import { AboutDialog } from './components/AboutDialog'
+import { AddItemDialog } from './components/AddItemDialog'
+import { ResetDialog } from './components/ResetDialog'
 import { Toast, type ToastMessage } from './components/Toast'
-import { contributionsRepo, dataSource } from './lib/contributionsRepo'
+import { contributionsRepo } from './lib/contributionsRepo'
 import { toHebrewError } from './lib/errors'
 import type { Contribution } from './types'
 import './App.css'
 
-const initialNotifications: AppNotification[] = [
-  { id: 'n1', title: 'משפחת לוי נרשמה להביא עוגות', time: 'לפני 12 דקות', read: false },
-  { id: 'n2', title: 'נותרו 2 מקומות בקטגוריית מאפים מתוקים', time: 'לפני שעה', read: false },
-  { id: 'n3', title: 'הקידוש הקרוב יתקיים בשבת בשעה 11:15', time: 'אתמול', read: false },
-]
-
 type DialogState =
   | { kind: 'none' }
   | { kind: 'item'; item: Contribution }
-  | { kind: 'others' }
-  | { kind: 'notifications' }
-  | { kind: 'menu' }
-  | { kind: 'about' }
+  | { kind: 'add' }
+  | { kind: 'reset' }
 
 export default function App() {
   const [items, setItems] = useState<Contribution[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [dialog, setDialog] = useState<DialogState>({ kind: 'none' })
-  const [notifications, setNotifications] = useState(initialNotifications)
   const [toast, setToast] = useState<ToastMessage | null>(null)
   const [reloadKey, setReloadKey] = useState(0)
   const toastId = useRef(0)
@@ -66,7 +54,7 @@ export default function App() {
     return items.find((c) => c.id === dialog.item.id) ?? dialog.item
   }, [dialog, items])
 
-  const unreadCount = notifications.filter((n) => !n.read).length
+  const closeDialog = useCallback(() => setDialog({ kind: 'none' }), [])
 
   const handleRegister = useCallback(
     async (id: string, familyName: string) => {
@@ -94,35 +82,33 @@ export default function App() {
     [showToast],
   )
 
-  const closeDialog = useCallback(() => setDialog({ kind: 'none' }), [])
+  const handleAddCustom = useCallback(
+    async (title: string, familyName: string) => {
+      try {
+        await contributionsRepo.addCustom(title, familyName)
+        showToast(`${title} נוסף לרשימה על ידי ${familyName}`, 'success')
+      } catch (error) {
+        const message = toHebrewError(error)
+        showToast(message, 'error')
+        throw new Error(message)
+      }
+    },
+    [showToast],
+  )
 
-  const handleNavigate = useCallback((target: 'list' | 'families' | 'about') => {
-    if (target === 'families') {
-      setDialog({ kind: 'others' })
-      return
+  const handleReset = useCallback(async () => {
+    try {
+      await contributionsRepo.reset()
+      showToast('הרשימה אופסה. כל ההרשמות נמחקו.', 'success')
+    } catch (error) {
+      const message = toHebrewError(error)
+      showToast(message, 'error')
+      throw new Error(message)
     }
-    if (target === 'about') {
-      setDialog({ kind: 'about' })
-      return
-    }
-    setDialog({ kind: 'none' })
-    document.getElementById('list')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-  }, [])
-
-  const dataSourceLabel =
-    dataSource === 'firebase'
-      ? 'הנתונים מסונכרנים בזמן אמת מול השרת.'
-      : 'הנתונים נשמרים כרגע במכשיר שלכם בלבד. לאחר חיבור לשרת הם יסונכרנו בין כל המשפחות.'
+  }, [showToast])
 
   return (
     <div className="app" dir="rtl">
-      <AppHeader
-        notificationCount={unreadCount}
-        onOpenNotifications={() => setDialog({ kind: 'notifications' })}
-        onOpenMenu={() => setDialog({ kind: 'menu' })}
-        onNavigate={handleNavigate}
-      />
-
       <main className="app__main">
         <Hero />
         <ContributionPanel
@@ -130,13 +116,20 @@ export default function App() {
           isLoading={isLoading}
           errorMessage={errorMessage}
           onOpenItem={(item) => setDialog({ kind: 'item', item })}
-          onOpenOther={() => setDialog({ kind: 'others' })}
+          onOpenOther={() => setDialog({ kind: 'add' })}
           onRetry={() => setReloadKey((k) => k + 1)}
         />
       </main>
 
       <footer className="app__footer">
-        <p className="app__footer-title">שבת שלום ומבורכת</p>
+        {/* לחיצה כפולה על הברכה פותחת את חלונית האיפוס */}
+        <p
+          className="app__footer-title"
+          onDoubleClick={() => setDialog({ kind: 'reset' })}
+          title="לחיצה כפולה לאיפוס הרשימה"
+        >
+          שבת שלום ומבורכת
+        </p>
         <p className="app__footer-text">תודה לכל המשפחות שלוקחות חלק בהכנת הקידוש.</p>
       </footer>
 
@@ -147,23 +140,14 @@ export default function App() {
         onUnregister={handleUnregister}
       />
 
-      <OthersDialog open={dialog.kind === 'others'} items={items} onClose={closeDialog} />
-
-      <NotificationsSheet
-        open={dialog.kind === 'notifications'}
-        notifications={notifications}
+      <AddItemDialog
+        open={dialog.kind === 'add'}
+        existingTitles={items.map((c) => c.title)}
         onClose={closeDialog}
-        onMarkAllRead={() => setNotifications((prev) => prev.map((n) => ({ ...n, read: true })))}
+        onAdd={handleAddCustom}
       />
 
-      <MenuDrawer
-        open={dialog.kind === 'menu'}
-        onClose={closeDialog}
-        onNavigate={handleNavigate}
-        dataSourceLabel={dataSourceLabel}
-      />
-
-      <AboutDialog open={dialog.kind === 'about'} onClose={closeDialog} />
+      <ResetDialog open={dialog.kind === 'reset'} onClose={closeDialog} onConfirm={handleReset} />
 
       <Toast toast={toast} onDismiss={() => setToast(null)} />
     </div>

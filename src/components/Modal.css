@@ -17,12 +17,6 @@
   justify-content: center;
 }
 
-/* בכיוון RTL הערך flex-start מצמיד את המגירה לקצה הימני */
-.ovl--drawer {
-  align-items: stretch;
-  justify-content: flex-start;
-}
-
 @keyframes ovl-in {
   from { opacity: 0; }
   to   { opacity: 1; }
@@ -340,93 +334,15 @@
   line-height: 1.6;
 }
 
-/* ---------- מגירת התפריט ---------- */
-.menu-list {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.menu-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  width: 100%;
-  padding: 13px 14px;
-  border-radius: 14px;
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--c-ink);
-  transition: background-color 0.18s ease;
-}
-
-.menu-item:hover {
-  background: #FBF3F6;
-}
-
-.menu-item svg {
-  color: var(--c-rose);
-}
-
-.menu-note {
-  margin-top: 18px;
+.reset-warning {
+  margin-bottom: 18px;
   padding: 14px 16px;
   border-radius: var(--r-card);
-  background: var(--c-rose-tint);
-  font-size: 12.5px;
-  line-height: 1.65;
-  color: var(--c-muted);
-}
-
-/* ---------- התראות ---------- */
-.notif-list {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.notif {
-  display: flex;
-  gap: 12px;
-  padding: 14px 15px;
-  border-radius: var(--r-card);
-  background: #FBF7F9;
-  border: 1px solid var(--c-hairline);
-}
-
-.notif--unread {
-  background: var(--c-rose-tint);
-  border-color: var(--c-rose-line);
-}
-
-.notif__dot {
-  flex: none;
-  width: 8px;
-  height: 8px;
-  margin-top: 6px;
-  border-radius: 50%;
-  background: var(--c-rose);
-}
-
-.notif--read .notif__dot {
-  background: #DED7E4;
-}
-
-.notif__text {
-  flex: 1 1 auto;
-}
-
-.notif__title {
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--c-ink);
-  line-height: 1.45;
-}
-
-.notif__time {
-  margin-top: 4px;
-  font-size: 12px;
-  color: var(--c-muted);
+  background: #FDECF1;
+  color: var(--c-rose-deep);
+  font-size: 13.5px;
+  font-weight: 500;
+  line-height: 1.6;
 }
 
 /* ================= מחשב שולחני ================= */
