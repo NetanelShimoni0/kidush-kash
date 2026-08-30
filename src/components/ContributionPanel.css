@@ -1,0 +1,323 @@
+/* =================================================================
+   פאנל "מה מביאים?" — חופף על ה-Hero, בדיוק כמו בעיצוב הייחוס
+   ================================================================= */
+.panel {
+  position: relative;
+  z-index: 5;
+  direction: rtl;
+  margin-top: -68px;
+}
+
+.panel__inner {
+  max-width: 1120px;
+  margin-inline: auto;
+  padding: 30px var(--pad-side) 44px;
+  background: var(--c-panel);
+  border-radius: var(--r-panel) var(--r-panel) 0 0;
+  box-shadow: var(--sh-panel);
+  min-height: 60vh;
+}
+
+/* ---------- כותרת הפאנל ---------- */
+.panel__head {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 26px;
+}
+
+.panel__title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: var(--fs-h2);
+  font-weight: 800;
+  color: var(--c-ink);
+  letter-spacing: -0.01em;
+}
+
+.panel__title svg {
+  color: var(--c-rose);
+}
+
+.panel__squiggle {
+  width: 168px;
+  height: 13px;
+  margin-top: 7px;
+}
+
+/* ---------- הרשימה ---------- */
+.panel__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-row);
+}
+
+.row {
+  list-style: none;
+}
+
+.row__btn {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  width: 100%;
+  min-height: 74px;
+  padding: 12px 14px;
+  border-radius: var(--r-card);
+  background: var(--c-surface);
+  border: 1px solid var(--c-hairline);
+  box-shadow: var(--sh-card);
+  text-align: right;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+
+.row__btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(148, 92, 116, 0.12);
+  border-color: var(--c-rose-line);
+}
+
+.row__btn:active {
+  transform: translateY(0) scale(0.995);
+}
+
+.row__btn--done {
+  background: #FDFBFC;
+}
+
+/* ---------- עיגול האייקון (הצד הימני של הכרטיס) ---------- */
+.row__icon {
+  display: grid;
+  place-items: center;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  flex: none;
+}
+
+.row__icon--pink     { background: var(--t-pink-bg);     color: var(--t-pink-fg); }
+.row__icon--peach    { background: var(--t-peach-bg);    color: var(--t-peach-fg); }
+.row__icon--lavender { background: var(--t-lavender-bg); color: var(--t-lavender-fg); }
+.row__icon--mint     { background: var(--t-mint-bg);     color: var(--t-mint-fg); }
+
+.row__icon--add {
+  background: #FBDCE6;
+  color: var(--c-rose);
+  box-shadow: 0 0 0 1.5px rgba(224, 65, 111, 0.22);
+}
+
+/* ---------- טקסט ---------- */
+.row__text {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1 1 auto;
+  min-width: 0;
+  text-align: right;
+}
+
+.row__title {
+  font-size: var(--fs-title);
+  font-weight: 700;
+  color: var(--c-ink);
+  line-height: 1.35;
+}
+
+.row__families {
+  font-size: var(--fs-meta);
+  font-weight: 400;
+  color: var(--c-muted);
+  line-height: 1.45;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ---------- מונה ופס התקדמות ---------- */
+.row__status {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  flex: none;
+  width: 84px;
+}
+
+.row__count {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--c-ink);
+}
+
+.bar {
+  display: block;
+  width: 100%;
+  height: 5px;
+  border-radius: var(--r-pill);
+  background: var(--c-rose-soft);
+  overflow: hidden;
+}
+
+/* בכיוון RTL הבלוק מתחיל מהקצה הימני — המילוי מתקדם ימין ← שמאל */
+.bar__fill {
+  display: block;
+  height: 100%;
+  border-radius: var(--r-pill);
+  background: var(--c-rose);
+  transition: width 0.4s cubic-bezier(0.22, 0.7, 0.3, 1);
+}
+
+/* ---------- צ׳בון (הקצה השמאלי) ---------- */
+.row__chevron {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 22px;
+  color: #A9A3BE;
+  transition: transform 0.18s ease, color 0.18s ease;
+}
+
+.row__btn:hover .row__chevron {
+  color: var(--c-rose);
+  transform: translateX(-3px);
+}
+
+/* ---------- מצב הושלם ---------- */
+.row__done {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--t-mint-bg);
+  color: var(--t-mint-fg);
+  margin-inline-end: 4px;
+}
+
+/* ---------- כרטיס "אחר" ---------- */
+.row__btn--other {
+  background: var(--c-rose-tint);
+  border: 2px dashed var(--c-rose-line);
+  box-shadow: none;
+}
+
+.row__btn--other:hover {
+  background: #FCEDF2;
+  border-color: var(--c-rose);
+  box-shadow: none;
+}
+
+/* ---------- מצבי טעינה / שגיאה / ריק ---------- */
+.panel__loading {
+  padding: 6px 4px 0;
+  font-size: var(--fs-meta);
+  color: var(--c-muted);
+  text-align: center;
+}
+
+.panel__state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 44px 20px;
+  text-align: center;
+}
+
+.panel__state-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--c-ink);
+}
+
+.panel__state-text {
+  font-size: var(--fs-body);
+  color: var(--c-muted);
+  line-height: 1.6;
+}
+
+.panel__state--error .panel__state-title {
+  color: var(--c-rose-deep);
+}
+
+/* ---------- שלדי טעינה ---------- */
+.row--skeleton .row__btn {
+  pointer-events: none;
+}
+
+.sk {
+  display: block;
+  border-radius: var(--r-pill);
+  background: linear-gradient(90deg, #F6EFF2 25%, #FBF6F8 50%, #F6EFF2 75%);
+  background-size: 400% 100%;
+  animation: sk-shimmer 1.3s ease-in-out infinite;
+}
+
+.sk--circle { width: 50px; height: 50px; border-radius: 50%; flex: none; }
+.sk--line   { height: 11px; }
+.sk--w60    { width: 62%; }
+.sk--w40    { width: 40%; }
+.sk--bar    { width: 84px; height: 5px; flex: none; }
+
+@keyframes sk-shimmer {
+  0%   { background-position: 100% 0; }
+  100% { background-position: 0 0; }
+}
+
+/* ================= מסכים בינוניים ================= */
+@media (min-width: 560px) {
+  .panel { margin-top: -80px; }
+
+  .panel__inner {
+    padding: 38px var(--pad-side) 56px;
+  }
+
+  .panel__squiggle { width: 196px; height: 15px; }
+
+  .row__btn   { min-height: 84px; padding: 14px 16px; gap: 15px; }
+  .row__icon  { width: 58px; height: 58px; }
+  .sk--circle { width: 58px; height: 58px; }
+  .row__status { width: 96px; }
+  .row__count { font-size: 13.5px; }
+}
+
+/* ================= מחשב שולחני ================= */
+@media (min-width: 900px) {
+  .panel { margin-top: -96px; padding-inline: var(--pad-side); }
+
+  .panel__inner {
+    padding: 48px 40px 60px;
+    border-radius: var(--r-panel);
+    min-height: 0;
+  }
+
+  .panel__head { margin-bottom: 36px; }
+  .panel__title { font-size: 32px; }
+  .panel__title svg { width: 32px; height: 32px; }
+  .panel__squiggle { width: 232px; height: 17px; }
+
+  /* שתי עמודות — הכרטיס נשאר זהה במבנה הפנימי שלו */
+  .panel__list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+    align-items: stretch;
+  }
+
+  .row__btn { height: 100%; min-height: 88px; padding: 16px 18px; }
+  .row__icon { width: 60px; height: 60px; }
+  .row__status { width: 104px; }
+
+  /* כרטיס "אחר" נפרש על שתי העמודות */
+  .row--other { grid-column: 1 / -1; }
+
+  .panel__loading,
+  .panel__state { grid-column: 1 / -1; }
+}
+
+@media (min-width: 1240px) {
+  .panel__list { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .panel__inner { padding: 54px 48px 68px; }
+}

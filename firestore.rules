@@ -1,0 +1,48 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    match /contributions/{contributionId} {
+
+      // Everyone may read the kiddush list.
+      allow read: if true;
+
+      // Seeding the initial list is allowed only for well-formed documents.
+      allow create: if isValidShape(request.resource.data);
+
+      // The only mutable field is the list of registered families, and it can
+      // never exceed the number of volunteers the item asks for.
+      allow update: if onlyFamiliesChanged()
+                    && isValidFamilies(request.resource.data.registeredFamilies)
+                    && request.resource.data.registeredFamilies.size()
+                       <= resource.data.quantityRequired;
+
+      allow delete: if false;
+    }
+
+    // Nothing else is reachable from the client.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+
+  function isValidShape(data) {
+    return data.keys().hasAll(['title', 'icon', 'tint', 'quantityRequired', 'registeredFamilies'])
+           && data.title is string && data.title.size() > 0 && data.title.size() <= 80
+           && data.icon is string
+           && data.tint is string
+           && data.quantityRequired is int
+           && data.quantityRequired >= 1 && data.quantityRequired <= 50
+           && isValidFamilies(data.registeredFamilies);
+  }
+
+  function isValidFamilies(families) {
+    return families is list && families.size() <= 50;
+  }
+
+  function onlyFamiliesChanged() {
+    return request.resource.data.diff(resource.data).affectedKeys()
+           .hasOnly(['registeredFamilies']);
+  }
+}

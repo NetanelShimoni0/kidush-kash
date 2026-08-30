@@ -1,0 +1,26 @@
+node_modules
+dist
+dist-ssr
+.DS_Store
+*.local
+
+# environment
+.env
+.env.*
+!.env.example
+
+# firebase
+.firebase
+firebase-debug.log
+firestore-debug.log
+
+# vercel
+.vercel
+
+# editors
+.qodo
+.idea
+*.swp
+
+# typescript incremental build info
+*.tsbuildinfo

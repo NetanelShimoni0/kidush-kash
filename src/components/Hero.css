@@ -1,0 +1,164 @@
+.hero {
+  position: relative;
+  direction: rtl;
+  overflow: hidden;
+  padding: 34px var(--pad-side) 96px;
+}
+
+/* ---------- תוכן ---------- */
+.hero__content {
+  position: relative;
+  z-index: 2;
+  max-width: 560px;
+  margin-inline: auto;
+  text-align: center;
+}
+
+.hero__pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 18px;
+  border-radius: var(--r-pill);
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid var(--c-rose-line);
+  color: #B96A87;
+  font-size: 13px;
+  font-weight: 500;
+  box-shadow: 0 2px 10px rgba(190, 110, 140, 0.07);
+}
+
+.hero__pill svg {
+  color: var(--c-rose);
+}
+
+.hero__title {
+  margin-top: 26px;
+  font-size: var(--fs-display);
+  font-weight: 800;
+  line-height: 1.32;
+  letter-spacing: -0.015em;
+  color: var(--c-ink);
+}
+
+.hero__title-accent {
+  color: var(--c-rose);
+}
+
+.hero__lead {
+  margin-top: 20px;
+  font-size: var(--fs-lead);
+  font-weight: 400;
+  line-height: 1.75;
+  color: var(--c-muted);
+  text-wrap: balance;
+}
+
+/* ---------- קישוטים ---------- */
+.hero__decor {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.hero__lolli--a {
+  position: absolute;
+  top: 34px;
+  right: -34px;
+  width: 148px;
+  transform: rotate(18deg);
+}
+
+.hero__lolli--b {
+  position: absolute;
+  top: 300px;
+  left: -20px;
+  width: 92px;
+  transform: rotate(-26deg);
+}
+
+.hero__cupcake {
+  position: absolute;
+  top: 268px;
+  right: -18px;
+  width: 128px;
+}
+
+.hero__cup {
+  position: absolute;
+  top: 66px;
+  left: -26px;
+  width: 152px;
+}
+
+.hero__star {
+  position: absolute;
+  top: 214px;
+  right: 96px;
+  width: 32px;
+  transform: rotate(-12deg);
+}
+
+.hero__sprinkles {
+  position: absolute;
+  top: 176px;
+  left: 12px;
+  width: 130px;
+  opacity: 0.85;
+}
+
+/* ================= מסכים בינוניים ================= */
+@media (min-width: 560px) {
+  .hero {
+    padding: 44px var(--pad-side) 112px;
+  }
+
+  .hero__lolli--a { width: 186px; right: -30px; top: 40px; }
+  .hero__lolli--b { width: 112px; left: -10px; top: 330px; }
+  .hero__cupcake  { width: 158px; right: -8px; top: 296px; }
+  .hero__cup      { width: 190px; left: -16px; top: 74px; }
+  .hero__star     { right: 130px; top: 236px; width: 38px; }
+}
+
+/* ================= מחשב שולחני ================= */
+@media (min-width: 900px) {
+  .hero {
+    padding: 66px var(--pad-side) 150px;
+    min-height: 480px;
+  }
+
+  .hero__content {
+    max-width: 700px;
+  }
+
+  .hero__title {
+    font-size: 56px;
+    margin-top: 32px;
+  }
+
+  .hero__lead {
+    font-size: 19px;
+    margin-top: 26px;
+  }
+
+  .hero__pill {
+    font-size: 14px;
+    padding: 9px 22px;
+  }
+
+  /* בפריסת מחשב הקישוטים נפרשים לרוחב במקום להצטופף סביב הטקסט */
+  .hero__lolli--a { width: 232px; right: 3%; top: 52px; }
+  .hero__lolli--b { width: 132px; left: 5%; top: 62px; transform: rotate(-18deg); }
+  .hero__cupcake  { width: 196px; right: 6%; top: auto; bottom: 34px; }
+  .hero__cup      { width: 236px; left: 3%; top: auto; bottom: 10px; }
+  .hero__star     { right: 17%; top: 268px; width: 44px; }
+  .hero__sprinkles { top: 210px; left: 14%; width: 168px; }
+}
+
+@media (min-width: 1240px) {
+  .hero__lolli--a { right: 9%; }
+  .hero__lolli--b { left: 11%; }
+  .hero__cupcake  { right: 12%; }
+  .hero__cup      { left: 9%; }
+}
