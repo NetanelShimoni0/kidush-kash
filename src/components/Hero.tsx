@@ -1,17 +1,22 @@
 import { HeartIcon } from './icons/UiIcons'
+import lollipopBig from '../assets/decor/lollipop-big.webp'
+import kiddushCup from '../assets/decor/kiddush-cup.webp'
+import cupcake from '../assets/decor/cupcake.webp'
+import lollipopSmall from '../assets/decor/lollipop-small.webp'
+import sugarStar from '../assets/decor/sugar-star.webp'
 import './Hero.css'
 
 /*
   הקישוטים הם חיתוכים של האיור המקורי מקובץ העיצוב, לא ציור וקטורי מחדש.
-  כל חיתוך עבר נרמול רקע לצבע הרקע של הדף והחלקת קצוות לשקיפות,
-  כך שהוא נטמע ברקע ללא תפר גלוי.
+  כל חיתוך עבר מיצוי רקע והפיכתו לשקוף, כך שהוא נטמע ברקע ללא תפר גלוי.
+  הייבוא עובר דרך Vite כדי שהנתיבים יעבדו גם תחת נתיב-בסיס (GitHub Pages).
 */
 const decorations = [
-  { src: '/decor/lollipop-big.webp', className: 'hero__decor-item hero__lolli-big' },
-  { src: '/decor/kiddush-cup.webp', className: 'hero__decor-item hero__cup' },
-  { src: '/decor/cupcake.webp', className: 'hero__decor-item hero__cupcake' },
-  { src: '/decor/lollipop-small.webp', className: 'hero__decor-item hero__lolli-small' },
-  { src: '/decor/sugar-star.webp', className: 'hero__decor-item hero__star' },
+  { src: lollipopBig, className: 'hero__decor-item hero__lolli-big' },
+  { src: kiddushCup, className: 'hero__decor-item hero__cup' },
+  { src: cupcake, className: 'hero__decor-item hero__cupcake' },
+  { src: lollipopSmall, className: 'hero__decor-item hero__lolli-small' },
+  { src: sugarStar, className: 'hero__decor-item hero__star' },
 ]
 
 export function Hero() {
@@ -19,7 +24,14 @@ export function Hero() {
     <section className="hero" aria-labelledby="hero-title">
       <div className="hero__decor" aria-hidden>
         {decorations.map((d) => (
-          <img key={d.src} className={d.className} src={d.src} alt="" loading="eager" decoding="async" />
+          <img
+            key={d.src}
+            className={d.className}
+            src={d.src}
+            alt=""
+            loading="eager"
+            decoding="async"
+          />
         ))}
       </div>
 
