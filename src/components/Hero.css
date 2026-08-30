@@ -62,50 +62,45 @@
   pointer-events: none;
 }
 
+/*
+  הקישוטים עוגנים לפינות בלבד, בדיוק כמו בעיצוב הייחוס:
+  סוכרייה גדולה משמאל למעלה, גביע הקידוש מימין למעלה,
+  קאפקייק משמאל למטה וסוכרייה קטנה מימין למטה.
+  במובייל הכוכב והסוכריות הקטנות מוסתרים כדי שהמסך הראשון יישאר נקי.
+*/
 .hero__lolli--a {
   position: absolute;
-  top: 34px;
-  right: -34px;
-  width: 148px;
-  transform: rotate(18deg);
+  top: 84px;
+  left: -52px;
+  width: 112px;
+  transform: rotate(-16deg);
 }
 
 .hero__lolli--b {
   position: absolute;
-  top: 300px;
-  left: -20px;
-  width: 92px;
-  transform: rotate(-26deg);
+  bottom: 88px;
+  right: -20px;
+  width: 72px;
+  transform: rotate(22deg);
 }
 
 .hero__cupcake {
   position: absolute;
-  top: 268px;
-  right: -18px;
-  width: 128px;
+  bottom: 96px;
+  left: -30px;
+  width: 100px;
 }
 
 .hero__cup {
   position: absolute;
-  top: 66px;
-  left: -26px;
-  width: 152px;
+  top: 58px;
+  right: -50px;
+  width: 120px;
 }
 
-.hero__star {
-  position: absolute;
-  top: 214px;
-  right: 96px;
-  width: 32px;
-  transform: rotate(-12deg);
-}
-
+.hero__star,
 .hero__sprinkles {
-  position: absolute;
-  top: 176px;
-  left: 12px;
-  width: 130px;
-  opacity: 0.85;
+  display: none;
 }
 
 /* ================= מסכים בינוניים ================= */
@@ -114,11 +109,19 @@
     padding: 44px var(--pad-side) 112px;
   }
 
-  .hero__lolli--a { width: 186px; right: -30px; top: 40px; }
-  .hero__lolli--b { width: 112px; left: -10px; top: 330px; }
-  .hero__cupcake  { width: 158px; right: -8px; top: 296px; }
-  .hero__cup      { width: 190px; left: -16px; top: 74px; }
-  .hero__star     { right: 130px; top: 236px; width: 38px; }
+  .hero__lolli--a { width: 142px; left: -44px; top: 84px; }
+  .hero__lolli--b { width: 90px;  right: -14px; bottom: 96px; }
+  .hero__cupcake  { width: 124px; left: -22px; bottom: 100px; }
+  .hero__cup      { width: 152px; right: -40px; top: 62px; }
+
+  .hero__star {
+    display: block;
+    position: absolute;
+    top: 232px;
+    left: 44px;
+    width: 26px;
+    transform: rotate(-12deg);
+  }
 }
 
 /* ================= מחשב שולחני ================= */
@@ -147,18 +150,32 @@
     padding: 9px 22px;
   }
 
-  /* בפריסת מחשב הקישוטים נפרשים לרוחב במקום להצטופף סביב הטקסט */
-  .hero__lolli--a { width: 232px; right: 3%; top: 52px; }
-  .hero__lolli--b { width: 132px; left: 5%; top: 62px; transform: rotate(-18deg); }
-  .hero__cupcake  { width: 196px; right: 6%; top: auto; bottom: 34px; }
-  .hero__cup      { width: 236px; left: 3%; top: auto; bottom: 10px; }
-  .hero__star     { right: 17%; top: 268px; width: 44px; }
-  .hero__sprinkles { top: 210px; left: 14%; width: 168px; }
+  /*
+    בפריסת מחשב הקישוטים נפרשים לרוחב ונשארים מחוץ לעמודת הטקסט המרכזית.
+    ה-bottom נמדד מתחתית ה-Hero, שממנה 96 פיקסלים מוסתרים מאחורי הפאנל,
+    ולכן כל ערך bottom נשמר מעל הסף הזה כדי שהקישוט לא ייחתך.
+  */
+  .hero__lolli--a { width: 168px; left: 5%;  top: 92px; }
+  .hero__lolli--b { width: 92px;  right: 17%; bottom: 118px; transform: rotate(24deg); }
+  .hero__cupcake  { width: 132px; left: 12%; bottom: 112px; }
+  .hero__cup      { width: 164px; right: 5%; top: 104px; }
+  .hero__star     { left: 21%; top: 306px; width: 30px; }
+
+  .hero__sprinkles {
+    display: block;
+    position: absolute;
+    top: 120px;
+    right: 24%;
+    width: 118px;
+    opacity: 0.8;
+  }
 }
 
 @media (min-width: 1240px) {
-  .hero__lolli--a { right: 9%; }
-  .hero__lolli--b { left: 11%; }
-  .hero__cupcake  { right: 12%; }
-  .hero__cup      { left: 9%; }
+  .hero__lolli--a { left: 9%; }
+  .hero__lolli--b { right: 20%; }
+  .hero__cupcake  { left: 15%; }
+  .hero__cup      { right: 9%; }
+  .hero__star     { left: 24%; }
+  .hero__sprinkles { right: 27%; }
 }

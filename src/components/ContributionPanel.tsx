@@ -16,19 +16,19 @@ function Squiggle() {
   return (
     <svg className="panel__squiggle" viewBox="0 0 224 18" aria-hidden focusable="false">
       <path
-        d="M5 7c32 5.4 64 5.6 96 2.4S164 5.6 219 8.6"
+        d="M4 8.4C34 3.6 62 3.2 90 6.4s58 4.4 90-.4"
         fill="none"
         stroke="var(--c-rose)"
-        strokeWidth="2.4"
+        strokeWidth="2.6"
         strokeLinecap="round"
       />
       <path
-        d="M18 14c28 3 56 2.8 82 .6S155 12 206 14.6"
+        d="M24 15.2c28-4 54-4.2 80-1.2s52 4 116-.6"
         fill="none"
         stroke="var(--c-rose)"
-        strokeWidth="1.7"
+        strokeWidth="1.9"
         strokeLinecap="round"
-        opacity="0.5"
+        opacity="0.62"
       />
     </svg>
   )

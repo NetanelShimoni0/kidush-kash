@@ -24,10 +24,8 @@ export function NotificationsSheet({ open, notifications, onClose, onMarkAllRead
       subtitle={unread > 0 ? `${unread} התראות שלא נקראו` : 'אין התראות חדשות'}
       onClose={onClose}
       footer={
+        /* בממשק RTL כפתור הפעולה הראשי יושב בקצה הימני */
         <>
-          <button type="button" className="btn btn--ghost" onClick={onClose}>
-            סגירה
-          </button>
           <button
             type="button"
             className="btn btn--primary"
@@ -35,6 +33,9 @@ export function NotificationsSheet({ open, notifications, onClose, onMarkAllRead
             disabled={unread === 0}
           >
             סימון הכול כנקרא
+          </button>
+          <button type="button" className="btn btn--ghost" onClick={onClose}>
+            סגירה
           </button>
         </>
       }

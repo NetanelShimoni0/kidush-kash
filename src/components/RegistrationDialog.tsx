@@ -69,10 +69,8 @@ export function RegistrationDialog({ item, onClose, onRegister, onUnregister }: 
       }
       onClose={onClose}
       footer={
+        /* בממשק RTL כפתור הפעולה הראשי יושב בקצה הימני */
         <>
-          <button type="button" className="btn btn--ghost" onClick={onClose}>
-            ביטול
-          </button>
           <button
             type="button"
             className="btn btn--primary"
@@ -80,6 +78,9 @@ export function RegistrationDialog({ item, onClose, onRegister, onUnregister }: 
             disabled={isSaving || isFull}
           >
             {isSaving ? 'שומר...' : 'שמירה'}
+          </button>
+          <button type="button" className="btn btn--ghost" onClick={onClose}>
+            ביטול
           </button>
         </>
       }
